@@ -1,0 +1,12 @@
+{
+  "features": [
+    "temperature_c",
+    "pressure_hpa",
+    "humidity_pct"
+  ],
+  "algorithm": "Isolation Forest",
+  "n_estimators": 500,
+  "random_state": 42,
+  "threshold_quantile": 0.05,
+  "decision_threshold": -0.07576715188128838
+}
