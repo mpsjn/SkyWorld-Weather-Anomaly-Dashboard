@@ -26,20 +26,24 @@ function typeLabel(r){
   if(type.includes('temporal')) return 'Temporal anomaly';
   return 'General anomaly';
 }
-function anomalyType(r){
+function anomalyType(r, eventIndex = null){
   const label = typeLabel(r);
 
   if(label === 'Normal'){
     return '<span class="type-tag normal-type">Normal</span>';
   }
 
+  const indexAttr = eventIndex !== null
+    ? `data-event-index="${eventIndex}"`
+    : `data-anomaly-row="${demo.rows.indexOf(r)}"`;
+
   return `
     <button
       type="button"
       class="type-tag anomaly-type anomaly-type-button"
-      data-anomaly-row="${demo.rows.indexOf(r)}"
+      ${indexAttr}
       title="Click to view resolution">
-      ${label}
+      ${label} →
     </button>
   `;
 }
