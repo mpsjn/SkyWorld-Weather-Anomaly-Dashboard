@@ -12,3 +12,20 @@
 
 /* Engineer resolution is visible directly in every anomaly event. */
 .resolution-row td{padding:0 12px 12px;border-top:0}.inline-resolution{padding:14px 16px;border:1px solid rgba(164,135,255,.24);border-radius:12px;background:rgba(164,135,255,.055)}.resolution-title{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:9px}.resolution-title span{font-size:10px;letter-spacing:.09em;opacity:.65;font-weight:700}.resolution-title strong{padding:5px 9px;border-radius:999px;background:rgba(164,135,255,.16);color:#d9ceff;font-size:12px}.resolution-summary{font-size:13px;line-height:1.55}.inline-resolution details{margin-top:10px}.inline-resolution summary{cursor:pointer;font-weight:700;font-size:12px}.resolution-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.resolution-grid>div{padding:11px;border-radius:10px;background:rgba(0,0,0,.12);border:1px solid rgba(255,255,255,.05)}.resolution-grid p{margin:6px 0 0;line-height:1.5;opacity:.8}.resolution-full{grid-column:1/-1}@media(max-width:800px){.resolution-grid{grid-template-columns:1fr}.resolution-full{grid-column:auto}}
+.anomaly-type-button {
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.anomaly-type-button:hover {
+  transform: translateY(-1px);
+  opacity: 0.85;
+  text-decoration: underline;
+}
+
+.anomaly-type-button:focus {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
