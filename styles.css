@@ -12,3 +12,33 @@
 
 /* Engineer resolution is visible directly in every anomaly event. */
 .resolution-row td{padding:0 12px 12px;border-top:0}.inline-resolution{padding:14px 16px;border:1px solid rgba(164,135,255,.24);border-radius:12px;background:rgba(164,135,255,.055)}.resolution-title{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:9px}.resolution-title span{font-size:10px;letter-spacing:.09em;opacity:.65;font-weight:700}.resolution-title strong{padding:5px 9px;border-radius:999px;background:rgba(164,135,255,.16);color:#d9ceff;font-size:12px}.resolution-summary{font-size:13px;line-height:1.55}.inline-resolution details{margin-top:10px}.inline-resolution summary{cursor:pointer;font-weight:700;font-size:12px}.resolution-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.resolution-grid>div{padding:11px;border-radius:10px;background:rgba(0,0,0,.12);border:1px solid rgba(255,255,255,.05)}.resolution-grid p{margin:6px 0 0;line-height:1.5;opacity:.8}.resolution-full{grid-column:1/-1}@media(max-width:800px){.resolution-grid{grid-template-columns:1fr}.resolution-full{grid-column:auto}}
+
+
+/* Click-to-investigate anomaly details */
+.clickable-row{cursor:pointer;transition:background .15s ease,transform .15s ease}
+.clickable-row:hover{background:rgba(164,135,255,.09)}
+.clickable-row:focus{outline:2px solid rgba(164,135,255,.65);outline-offset:-2px}
+.diagnose-btn{border:1px solid rgba(164,135,255,.38);background:rgba(164,135,255,.12);color:#e2d9ff;padding:8px 11px;border-radius:9px;font-weight:700;font-size:11px;cursor:pointer;white-space:nowrap}
+.diagnose-btn:hover{background:rgba(164,135,255,.23)}
+.anomaly-modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:24px}
+.anomaly-modal.open{display:flex}
+.anomaly-modal-backdrop{position:absolute;inset:0;background:rgba(2,5,12,.78);backdrop-filter:blur(7px)}
+.anomaly-dialog{position:relative;width:min(900px,100%);max-height:min(88vh,900px);overflow:auto;background:linear-gradient(145deg,#151a2a,#0d1220);border:1px solid #343c59;border-radius:20px;box-shadow:0 28px 90px rgba(0,0,0,.55);padding:26px}
+.anomaly-dialog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.anomaly-dialog-head h2{font:600 28px 'Space Grotesk';margin:0}
+.modal-close{width:38px;height:38px;border:1px solid var(--line);border-radius:10px;background:#111725;color:#cbd1df;font-size:24px;line-height:1;cursor:pointer}
+.modal-close:hover{background:#20263a}
+.anomaly-summary{padding:18px 0 4px}
+.anomaly-summary-title{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:15px}
+.anomaly-meta-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.anomaly-meta-grid>div{padding:14px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06)}
+.anomaly-meta-grid span{display:block;color:#737e96;text-transform:uppercase;letter-spacing:.08em;font-size:9px;margin-bottom:7px}
+.anomaly-meta-grid strong{font-size:13px;line-height:1.45;color:#e1e5ef}
+.modal-diagnosis{margin-top:14px}
+.modal-diagnosis>div{min-height:115px}
+.modal-explanation{margin-top:15px;padding:16px;border:1px solid rgba(164,135,255,.2);border-radius:13px;background:rgba(164,135,255,.055)}
+.modal-explanation p:last-child{margin:0;color:#b9c1d1;font-size:12px;line-height:1.7}
+.modal-note{margin-top:12px;padding:13px 15px;border-left:3px solid var(--accent);background:rgba(164,135,255,.07);color:#b9c1d1;font-size:11px;line-height:1.6}
+body.modal-open{overflow:hidden}
+@media(max-width:800px){.anomaly-modal{padding:12px}.anomaly-dialog{padding:20px;border-radius:16px}.anomaly-meta-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.anomaly-meta-grid{grid-template-columns:1fr}.anomaly-dialog-head h2{font-size:23px}}
