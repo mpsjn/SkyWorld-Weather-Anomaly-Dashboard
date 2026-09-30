@@ -13,31 +13,41 @@ function renderAll(){
   renderFaults(rows); renderLatest(rows.slice(-8).reverse()); renderEvents(); renderReadings(); drawChart(rows);
 }
 function renderFaults(rows){const counts={}; rows.forEach(r=>{let f=r.fault==='NO_FAULT'?'Normal':r.fault;counts[f]=(counts[f]||0)+1}); const list=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5), max=list[0]?.[1]||1; $('#faultBars').innerHTML=list.map(([name,n])=>`<div class="fault-line"><div class="fault-meta"><span>${name.replaceAll('_',' ')}</span><b>${n}</b></div><div class="fault-track"><div class="fault-fill" style="width:${n/max*100}%"></div></div></div>`).join('')}
-function anomalyType(r){
-  if(!r.predictedAnomaly) return '<span class="type-tag normal-type">Normal</span>';
+function typeLabel(r){
+  if(!r.predictedAnomaly) return 'Normal';
   const type=String(r.anomalyType||r.fault||'anomaly').toLowerCase();
-  const feature=String(r.topFeature||'').toLowerCase();
-  let label='Anomaly';
-  if(type.includes('spike')) label=feature.includes('temperature')?'Temperature spike':feature.includes('humidity')?'Humidity spike':feature.includes('pressure')?'Pressure spike':'Sensor spike';
-  else if(type.includes('frozen')) label=feature.includes('humidity')?'Humidity frozen sensor':feature.includes('temperature')?'Temperature frozen sensor':feature.includes('pressure')?'Pressure frozen sensor':'Frozen sensor';
-  else if(type.includes('cross')||type.includes('multivariate')) label='Multivariate anomaly';
-  else if(type.includes('drift')) label=feature.includes('temperature')?'Temperature drift':feature.includes('humidity')?'Humidity drift':feature.includes('pressure')?'Pressure drift':'Sensor drift';
-  else if(type.includes('noise')) label='Noise burst';
-  else if(type.includes('communication')) label='Communication failure';
-  return `<span class="type-tag anomaly-type">${label}</span>`;
+  const feature=String(r.topFeature||r.affected_sensors||'').toLowerCase();
+  if(type.includes('spike')) return feature.includes('temperature')?'Temperature spike':feature.includes('humidity')?'Humidity spike':feature.includes('pressure')?'Pressure spike':'Sensor spike';
+  if(type.includes('frozen')) return feature.includes('humidity')?'Humidity frozen sensor':feature.includes('temperature')?'Temperature frozen sensor':feature.includes('pressure')?'Pressure frozen sensor':'Frozen sensor';
+  if(type.includes('cross')||type.includes('multivariate')) return 'Multivariate / cross-variable anomaly';
+  if(type.includes('drift')) return feature.includes('temperature')?'Temperature drift':feature.includes('humidity')?'Humidity drift':feature.includes('pressure')?'Pressure drift':'Sensor drift';
+  if(type.includes('noise')) return 'Noise burst';
+  if(type.includes('communication')) return 'Communication failure';
+  if(type.includes('temporal')) return 'Temporal anomaly';
+  return 'General anomaly';
+}
+function anomalyType(r){
+  const label=typeLabel(r);
+  return label==='Normal'?'<span class="type-tag normal-type">Normal</span>':`<span class="type-tag anomaly-type">${label}</span>`;
 }
 
 function engineerGuide(r){
-  const type=String(r.anomalyType||'').toLowerCase(), feature=String(r.topFeature||r.affected_sensors||'').toLowerCase();
+  const type=String(r.anomalyType||r.fault||'').toLowerCase(), feature=String(r.topFeature||r.affected_sensors||'').toLowerCase();
   const sensor=feature.includes('temperature')?'Temperature':feature.includes('humidity')?'Humidity':feature.includes('pressure')?'Pressure':feature||'affected sensor';
   if(!r.predictedAnomaly) return {title:'No fault action required',check:'No abnormal behaviour detected in this reading.',action:'Accept reading; continue normal monitoring.',verify:'No immediate field inspection needed.'};
   if(type.includes('spike')||type.includes('noise')) return {title:`${sensor} spike / noise burst`,check:`Inspect the ${sensor.toLowerCase()} sensor head, cable, connector and grounding first.`,action:'Check loose connectors, damaged cable, moisture ingress and electrical interference; reseat the connector and verify grounding.',verify:'Compare the next few readings with a trusted reference. If the spike repeats, inspect or replace the sensor/cable.'};
   if(type.includes('frozen')) return {title:`${sensor} frozen sensor`,check:`Check whether the ${sensor.toLowerCase()} value is staying nearly unchanged while other weather variables change.`,action:'Inspect sensor power, wiring and communication channel; verify the sensor is responding to a controlled change or known reference.',verify:'Confirm the value changes normally over subsequent samples. If it remains fixed, replace the sensor or channel.'};
   if(type.includes('drift')) return {title:`${sensor} drift`,check:`Inspect calibration and compare the ${sensor.toLowerCase()} reading against a calibrated reference.`,action:'Check calibration offset, sensor ageing, contamination and mounting conditions.',verify:'Perform a calibration/reference check. Recalibrate or replace the sensor if the offset persists.'};
   if(type.includes('cross')||type.includes('multivariate')) return {title:'Multivariate / cross-variable anomaly',check:'Compare temperature, humidity and pressure together before replacing any sensor.',action:'Verify sensor relationships, wiring and station conditions; inspect the channel with the highest attribution first.',verify:'Cross-check against a nearby/reference station and confirm all three channels return to a physically consistent relationship.'};
+  if(type.includes('temporal')) return {title:'Temporal anomaly',check:'Inspect the recent time sequence for an abrupt change, repeated pattern, or timing-related discontinuity.',action:'Check timestamps, sampling interval, logger clock, communications and the affected sensor channel.',verify:'Confirm the time series returns to the expected sampling interval and behaviour after correction.'};
   return {title:'General anomaly',check:`Inspect ${sensor.toLowerCase()} and the station data path.`,action:'Check sensor, connector, power and communication path before replacing hardware.',verify:'Confirm stable readings after inspection and compare with a trusted reference.'};
 }
-function engineerCard(r){const g=engineerGuide(r);return `<div class="engineer-card"><div class="engineer-card-head"><div><p class="kicker accent">ENGINEER QUICK DIAGNOSIS</p><h3>${g.title}</h3></div><span class="severity sev-${String(r.severity||'INFO').toLowerCase()}">${r.severity||'INFO'}</span></div><div class="diagnosis-grid"><div><span>What to check first</span><b>${g.check}</b></div><div><span>Recommended action</span><b>${g.action}</b></div><div><span>Verify repair</span><b>${g.verify}</b></div><div><span>Model evidence</span><b>${r.topFeature||r.affected_sensors||'—'} · ${r.topFeaturePct?Number(r.topFeaturePct).toFixed(0)+'% attribution':'evidence from diagnosis'}</b></div></div>${r.explanation?`<details><summary>Show full model explanation</summary><p>${r.explanation}</p></details>`:''}</div>`}
+function engineerCard(r){
+  const g=engineerGuide(r), label=typeLabel(r), severity=String(r.severity||'INFO').toLowerCase();
+  const evidence=r.topFeature||r.affected_sensors||'—';
+  const attribution=r.topFeaturePct?Number(r.topFeaturePct).toFixed(0)+'% attribution':'diagnosis evidence';
+  return `<div class="engineer-card"><div class="engineer-card-head"><div><p class="kicker accent">ENGINEER QUICK DIAGNOSIS</p><h3>${g.title}</h3><div class="engineer-type"><span>ANOMALY TYPE</span><strong>${label}</strong></div></div><span class="severity sev-${severity}">${r.severity||'INFO'}</span></div><div class="diagnosis-grid"><div><span>1 · What to check first</span><b>${g.check}</b></div><div><span>2 · Recommended action</span><b>${g.action}</b></div><div><span>3 · How to verify the repair</span><b>${g.verify}</b></div><div><span>4 · Model evidence / attribution</span><b>${evidence} · ${attribution}</b></div></div>${r.explanation?`<details open><summary>Detailed explanation</summary><p>${r.explanation}</p></details>`:''}</div>`;
+}
 function selectEngineerRow(i){const r=filtered[i]; if(r) $('#engineerPanel').innerHTML=engineerCard(r)}
 
 function status(r){return r.predictedAnomaly?'<span class="status-tag anomaly">ANOMALY</span>':'<span class="status-tag normal">NORMAL</span>'}
